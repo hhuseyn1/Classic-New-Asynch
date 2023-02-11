@@ -183,7 +183,6 @@ namespace ClassicAsynch_NewAsynch
         {
             if (cmbBox_Categories.Items is null)
                 return;
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -213,16 +212,11 @@ namespace ClassicAsynch_NewAsynch
         private void GetData(SqlCommand command, IAsyncResult ia)
         {
             SqlDataReader? dataReader = null;
-
             try
             {
                 dataReader = command.EndExecuteReader(ia);
                 while (dataReader.Read())
-                {
                     cmbBox_Categories.Items.Add(dataReader["Name"]);
-                }
-
-
             }
             catch (Exception ex)
             {
