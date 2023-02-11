@@ -195,22 +195,45 @@ namespace ClassicAsynch_NewAsynch
                 var connection = new SqlConnection(connectionString);
                 connection?.Open();
 
-                //var id = cmbBox_Categories.SelectedItem.ToString();
-                //var name = cmbBox_Authors.SelectedItem.ToString();
-
                 using SqlCommand command = new SqlCommand($"SELECT [Name] FROM Categories", connection);
                 AsyncCallback callback = new AsyncCallback(CallBackCategories);
+                IAsyncResult iar = command.BeginExecuteReader();
 
-                command.BeginExecuteReader(callback, command);
-                foreach (var item in command.Parameters)
-                {
-                cmbBox_Authors.Items.Add(item);
-                }
+                GetData(command,iar);
+                var reader = command.BeginExecuteReader();
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
         }
+
+
+        private void GetData(SqlCommand command, IAsyncResult ia)
+        {
+            SqlDataReader? dataReader = null;
+
+            try
+            {
+                dataReader = command.EndExecuteReader(ia);
+                while (dataReader.Read())
+                {
+                    cmbBox_Categories.Items.Add(dataReader["Name"]);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                if (dataReader is not null && !dataReader.IsClosed)
+                    dataReader.Close();
+            }
+        }
+
     }
 }
