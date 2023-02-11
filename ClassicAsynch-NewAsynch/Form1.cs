@@ -124,8 +124,9 @@ namespace ClassicAsynch_NewAsynch
 
                 var id = cmbBox_Categories.ToString()?.Split(' ')[0];
                 var name = cmbBox_Authors.SelectedItem.ToString();
-
-                using SqlCommand command = new SqlCommand($"SELECT * FROM Books JOIN Categories ON Categories.Id = Id_Category JOIN Authors ON Authors.Id = Id_Author \r\nWHERE Categories.Name = '{name}' AND Id_Author = {id}\r\n", connection);
+                using SqlCommand command = new SqlCommand($"SELECT * FROM Books JOIN Categories ON Categories.Id = Id_Category JOIN Authors ON Authors.Id = Id_Author WHERE Categories.Name = @name AND Id_Author = @id", connection);
+                command.Parameters.AddWithValue("@id", id);
+                command.Parameters.AddWithValue("@name", name);
                 AsyncCallback callback = new AsyncCallback(CallBackCategories);
 
                 command.BeginExecuteReader(callback, command);
@@ -201,6 +202,10 @@ namespace ClassicAsynch_NewAsynch
                 AsyncCallback callback = new AsyncCallback(CallBackCategories);
 
                 command.BeginExecuteReader(callback, command);
+                foreach (var item in command.Parameters)
+                {
+                cmbBox_Authors.Items.Add(item);
+                }
             }
             catch (Exception ex)
             {
