@@ -127,9 +127,9 @@ namespace ClassicAsynch_NewAsynch
                 using SqlCommand command = new SqlCommand($"SELECT * FROM Books JOIN Categories ON Categories.Id = Id_Category JOIN Authors ON Authors.Id = Id_Author WHERE Categories.Name = @name AND Id_Author = @id", connection);
                 command.Parameters.AddWithValue("@id", id);
                 command.Parameters.AddWithValue("@name", name);
-                AsyncCallback callback = new AsyncCallback(CallBackCategories);
 
-                command.BeginExecuteReader(callback, command);
+                IAsyncResult iar = command.BeginExecuteReader();
+                CallBackCategories(iar);
             }
             catch (Exception ex)
             {
@@ -185,6 +185,9 @@ namespace ClassicAsynch_NewAsynch
                 return;
         }
 
+
+
+
         private void Form1_Load(object sender, EventArgs e)
         {
             if (cmbBox_Authors.Items is null)
@@ -199,8 +202,10 @@ namespace ClassicAsynch_NewAsynch
                 IAsyncResult iar = command.BeginExecuteReader();
 
                 GetData(command,iar);
-                var reader = command.BeginExecuteReader();
-
+                using SqlCommand command2 = new SqlCommand($"SELECT [FirstName] +' '+ [LastName] AS [FullName] FROM Authors", connection);
+                IAsyncResult iar2 = command2.BeginExecuteReader();
+                GetData2(command2,iar2);
+                
             }
             catch (Exception ex)
             {
@@ -217,6 +222,27 @@ namespace ClassicAsynch_NewAsynch
                 dataReader = command.EndExecuteReader(ia);
                 while (dataReader.Read())
                     cmbBox_Categories.Items.Add(dataReader["Name"]);
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                if (dataReader is not null && !dataReader.IsClosed)
+                    dataReader.Close();
+            }
+        }
+        private void GetData2(SqlCommand command, IAsyncResult ia)
+        {
+            SqlDataReader? dataReader = null;
+            try
+            {
+                dataReader = command.EndExecuteReader(ia);
+                while (dataReader.Read())
+                    cmbBox_Authors.Items.Add(dataReader["FullName"]);
+                
             }
             catch (Exception ex)
             {
